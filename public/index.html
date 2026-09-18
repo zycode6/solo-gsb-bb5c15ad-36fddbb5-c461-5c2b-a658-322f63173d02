@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookie 罐演算工具</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🍪 Cookie 罐演算工具</h1>
+    <p class="subtitle">
+      逐条提交 <code>Set-Cookie</code> 响应头，观察入罐 / 覆盖 / 删除；输入请求 URL，
+      演算哪些 Cookie 会被发送及其排序规则（RFC 6265）。
+    </p>
+    <button id="resetBtn" class="btn btn-danger" type="button">重置 Cookie 罐</button>
+  </header>
+
+  <main class="layout">
+    <!-- 第一区：响应入罐 -->
+    <section class="card">
+      <h2>① 响应阶段：提交一条 Set-Cookie</h2>
+      <form id="storeForm">
+        <label for="responseUrl">响应 URL（决定 host 与缺省 Path）</label>
+        <input id="responseUrl" name="responseUrl" type="text" spellcheck="false"
+          placeholder="https://shop.example.com/admin/orders/list" value="https://shop.example.com/admin/orders/list" />
+
+        <label for="setCookie">单条 Set-Cookie 响应头</label>
+        <textarea id="setCookie" name="setCookie" rows="3" spellcheck="false"
+          placeholder="sid=abc123; Domain=example.com; Path=/admin; Max-Age=3600; Secure">sid=abc123; Domain=example.com; Path=/admin; Max-Age=3600; Secure</textarea>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">送入 Cookie 罐</button>
+        </div>
+        <div class="examples">
+          <span class="examples-label">快速示例：</span>
+          <button type="button" class="chip" data-demo="domain">Domain 子域</button>
+          <button type="button" class="chip" data-demo="hostonly">host-only</button>
+          <button type="button" class="chip" data-demo="defaultpath">缺省 Path</button>
+          <button type="button" class="chip" data-demo="reject">不匹配 Domain</button>
+          <button type="button" class="chip" data-demo="delete">Max-Age≤0 删除</button>
+        </div>
+      </form>
+      <div id="storeResult" class="result hidden" aria-live="polite"></div>
+    </section>
+
+    <!-- 第二区：请求演算 -->
+    <section class="card">
+      <h2>② 请求阶段：生成 Cookie 头</h2>
+      <form id="requestForm">
+        <label for="requestUrl">请求 URL</label>
+        <input id="requestUrl" name="requestUrl" type="text" spellcheck="false"
+          placeholder="https://shop.example.com/admin/orders/123" value="https://shop.example.com/admin/orders/123" />
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">演算请求</button>
+          <button type="button" class="chip" data-demo="req-https">HTTPS 子域</button>
+          <button type="button" class="chip" data-demo="req-http">HTTP（拦截 Secure）</button>
+          <button type="button" class="chip" data-demo="req-root">根路径</button>
+        </div>
+      </form>
+      <div id="requestResult" class="result hidden" aria-live="polite"></div>
+    </section>
+
+    <!-- 第三区：当前 Cookie 罐 -->
+    <section class="card card-wide">
+      <h2>③ 当前 Cookie 罐 <span id="jarCount" class="badge badge-neutral">0 项</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Value</th><th>作用域</th><th>Path</th>
+              <th>Secure</th><th>生命周期</th><th>状态</th>
+            </tr>
+          </thead>
+          <tbody id="jarBody"></tbody>
+        </table>
+        <p id="jarEmpty" class="empty-hint">罐中还没有 Cookie，先在上方提交一条 Set-Cookie。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    规则：Domain 必须匹配响应主机方可入罐 · 缺省 Path 取 URL 最后一个斜杠前目录 ·
+    host-only 仅匹配原主机，Domain cookie 覆盖子域 · Path 相等或前缀边界为 / ·
+    Max-Age≤0 删除同名同域同路径项 · 发送排序：Path 长度降序 → 创建顺序升序
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

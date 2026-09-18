@@ -1,0 +1,8 @@
+services:
+  cookie-jar-lab:
+    build: .
+    image: cookie-jar-lab:latest
+    container_name: cookie-jar-lab
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
